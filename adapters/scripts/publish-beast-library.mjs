@@ -19,6 +19,8 @@
 //    cover.png / .jpg / .webp (the shelf's cover) in adapters/claude/beast-library/ go in as they are.
 // 3. `beast skill put` the book. The package goes up before the book: the other way round a colleague
 //    could borrow a book whose package is not in the locker yet.
+// 4. The other cowart-*.zip in the `cowart` section are deleted, after the book is up: the library
+//    lends only the newest book, so the 省心版 keeps only the package that book names.
 //
 //   node adapters/scripts/publish-beast-library.mjs [<commit>] [--book-rev <n>] [--dry-run]
 //
@@ -129,6 +131,14 @@ try {
     else process.stdout.write(beast(['locker', 'put', zip, '--to', SECTION, '--note', note]))
     // 3. The book.
     process.stdout.write(beast(['skill', 'put', book, '--ai', 'claude-code']))
+    // 4. Older packages out of the locker: the library lends the newest book alone, so nobody downloads
+    //    them again. Only once the book is up (a failed put throws above), so the book on the shelf
+    //    always has its package.
+    const sectionItems = locker.sections?.find((section) => section.id === SECTION)?.items ?? []
+    for (const item of sectionItems) {
+      if (item.name === zipName || !/^cowart-.+\.zip$/.test(item.name)) continue
+      process.stdout.write(beast(['locker', 'rm', `${SECTION}/${item.name}`, '--yes']))
+    }
   }
 } finally {
   if (!DRY_RUN) rmSync(work, { recursive: true, force: true })
