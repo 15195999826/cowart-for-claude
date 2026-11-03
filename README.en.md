@@ -1,168 +1,77 @@
-# Cowart
+# Cowart for Claude
 
-Cowart is a native infinite-canvas widget plugin for Codex. It brings a tldraw-powered canvas into Codex for visual thinking, annotation, image generation, and annotation-driven image edits. The canvas opens directly as an MCP widget, and its data is saved in the active user project under `canvas/` instead of inside the plugin repository.
+An AI infinite canvas built on tldraw. Lay out images, videos, web page captures and AI-made HTML / slides on one canvas, draw an arrow to the spot you want changed, and let the AI iterate.
 
-The repository also conforms to [Agent Plugins v1.0.0](https://agent-plugins.org/specification): root-level `plugin.json`, `skills/`, and `mcp.json` provide the portable plugin entry points, while `.codex-plugin/plugin.json`, `.mcp.json`, and `.agents/plugins/marketplace.json` retain Codex-specific interface and installation metadata.
+中文：[README.md](README.md)
 
-中文说明: [README.md](README.md)
+![Cowart for Claude demo: Claude puts images on its page, an annotation pinned to a card, the AI's edit placed beside it, pages in folders](assets/cowart-for-claude-demo.gif)
 
-## Try Cowart on the Web
+This is a fork of [zhongerxin/Cowart](https://github.com/zhongerxin/Cowart) (MIT). The original is a Codex plugin whose canvas is an MCP Apps widget inside the chat, one canvas per project. This fork runs **one canvas service per machine** instead, so every session in **Claude Code desktop, Codex and ZCode** shares the same canvas and splits the work by page. Upstream code is left alone as far as possible; the changes live in `adapters/`.
 
-**No installation required—start creating right away.**
+The canvas UI and the skill the AI reads are in Chinese; the AI answers you in whatever language you use.
 
-Open [**cowart.jiqiren.ai**](https://cowart.jiqiren.ai/) in the Codex built-in browser, sign in to enter the canvas, and start creating.
+## What's different from the original
 
-## Features
+| | Original | This fork |
+|---|---|---|
+| Hosts | Codex | Claude Code desktop, Codex, ZCode |
+| Where the canvas shows | A widget in the Codex chat | A local page at `http://cowart.localhost`: Claude Code's Browser panel, Codex's built-in browser, or any browser |
+| How the AI works the canvas | MCP tools | A `cowart` command (Claude Code, Codex; no MCP); ZCode goes through a thin MCP bridge |
+| Canvas data | One per project (`<project>/canvas`) | One per machine (`~/.cowart/canvas`), shared by every project and session, split by page |
+| Image generation | Through the chat, by Codex | Pick the model and settings in the panel and hit send: the canvas service generates the image / video itself, no chat round trip |
 
-- Open a native tldraw infinite-canvas widget from Codex; normal use no longer opens a local page through a web browser or the in-app browser.
-- Persist canvas pages and image assets in the active project directory.
-- Create AI image slots on the canvas, enter a prompt directly, choose reference images, and let Codex generate an image that replaces the selected slot at the same position and aspect ratio.
-- Create a 16:9 `AI HTML` slot, generate a runnable single-file HTML page from a prompt and reference images, and embed it directly on the canvas for further editing and iteration.
-- Create `AI Slides` to organize images and HTML into a deck, or ask Codex to generate a specified number of coordinated 16:9 HTML pages; preview the deck with thumbnails or play it fullscreen.
-- After annotating an image, submit the annotation screenshot directly from the canvas so Codex can generate a clean revised image beside the original.
-- Use Cowart MCP tools to read selection state, save the canvas, insert images or HTML, and save page-local assets.
+New:
 
-## Installation
+- **Pages with owners**: each page belongs to one session at a time, and requests sent from the canvas go to the session that owns that page. Several open canvas tabs only save their changes, so they never overwrite each other or delete someone else's page.
+- **Resident canvas service**: one per machine, started at Windows sign-in, not tied to any session or host. A newer version replaces the running one without dropping open canvases.
+- **AI video, web references, video frames**: the bottom toolbar gains "AI video" (placeholder + generation panel) and "Web" (a full-page capture card that can be turned into HTML); right-click a video to save the current frame.
+- **AI image panel**: model, aspect ratio and settings in one panel that says whether it costs money; generated images keep their own proportions instead of being stretched.
+- **Annotations bound to cards**: an annotation arrow is pinned to the card it points at, follows it when it moves and goes when it is deleted. New: blue "notes" (standing instructions) and "clear annotations".
+- **Page folders**: the page menu becomes a folder tree with search, sorted by creation, name or last change; the AI files pages into folders.
+- **AI tidies the canvas**: add text, group into frames, move, resize, delete.
+- **Context menu**: "Copy reference" (page, shape id and local file path, ready to paste to the AI) and "Show in Explorer".
+- **Feedback inbox**: say "feedback: …" in a session in any project; it is filed on the machine and handled back in this repo.
 
-> [!IMPORTANT]
-> After installation, completely quit and restart Codex once before using Cowart. Restarting ensures that Cowart's new skills and MCP tools are fully loaded.
+Upstream bugs fixed along the way: piles of leftover `.tmp` files when a write fails on Windows; Ctrl+Z after deleting an image brings back its annotations but not the image; the 40-page cap; the context menu never opening again after dragging a card while it was open.
 
-### Ask Codex To Install It
+## Install
 
-Send the following message to Codex:
-
-```text
-Please install the Cowart Codex plugin through the Git marketplace bundled with its repository.
-First run codex plugin marketplace add zhongerxin/Cowart --ref main,
-then run codex plugin add cowart@cowart-github and use codex plugin list to confirm it is enabled.
-Cowart ships a self-contained MCP server and a prebuilt widget; it never runs npm install in the plugin cache and does not require new users to preinstall tldraw;
-do not install dependencies manually in the current repository, plugin cache, or marketplace snapshot.
-Do not clone the repository into the personal marketplace. When installation finishes, clearly remind me
-to completely quit and restart Codex once before using Cowart.
-```
-
-### Manual Install
-
-First register the Cowart Git repository as a Codex marketplace:
+Needs Node ≥ 22.12. Claude Code is supported in the desktop app only (not the CLI or IDE extensions). The AI image / AI video panels need the beast generation backend (a `beast` command on the machine); without it those two panels do not work (in Codex, AI image can use Codex's built-in image generation), while the canvas, annotations, AI HTML / slides and tidying all work as usual.
 
 ```bash
-codex plugin marketplace add zhongerxin/Cowart --ref main
+git clone -c core.autocrlf=false -c core.eol=lf https://github.com/15195999826/cowart-for-claude.git
+cd cowart-for-claude
+npm ci --prefix adapters
 ```
 
-Then install Cowart from that marketplace and verify it:
+- **Claude Code desktop (+ Codex)**: `npm --prefix adapters run install:claude`. Installs the cowart skill and the command entry `~/.cowart/bin/cowart.mjs`; on Windows also starts the canvas service at sign-in; if Codex is on the machine (`~/.codex`), also installs Codex's skill and prompt hook.
+- **ZCode**: `npm --prefix adapters run install:zcode`.
+
+Then start a new session (in Codex, a new task; it asks you once to trust the prompt hook). To uninstall: `node ~/.cowart/bin/cowart.mjs uninstall`, `npm --prefix adapters run uninstall:zcode`.
+
+## Use
+
+In a session, say "open the Cowart canvas" or "open the Cowart canvas <page name>":
+
+- **Claude Code**: the canvas opens in the Browser panel on the right. Requests from the canvas (edit by annotation, AI HTML, …) wake the session through a background listener and run once you confirm.
+- **Codex**: you get a link to open in the built-in browser (Ctrl+Shift+B). When a request is waiting, your next message gets a short reminder; say "check the canvas" to handle it.
+- **ZCode**: you get a URL to open in any browser.
+
+Say "take over <page name>" to move a page to the current session. AI image, AI HTML, AI slides and edit-by-annotation work on the canvas as in the original.
+
+## Develop
+
+Read [FORK.md](FORK.md) first (in Chinese): the ground rules (upstream as is + adapter layer), layout, host differences and the list of patch points. The adapter layer is described in [adapters/claude/README.md](adapters/claude/README.md) and [adapters/zcode/README.md](adapters/zcode/README.md).
 
 ```bash
-codex plugin add cowart@cowart-github
-codex plugin list
+npm --prefix adapters run check:contract   # upstream interfaces and patch points still there
+npm --prefix adapters run test:claude      # end-to-end checks (Claude Code and Codex command sessions)
+npm --prefix adapters run test:zcode       # ZCode bridge
+npm --prefix adapters run build:artifacts  # regenerate adapters/generated/ after changing adapters/
 ```
 
-You do not need to locate the plugin cache manually. Cowart's Git release tracks a self-contained MCP bundle and a prebuilt single-file widget. Codex can discover `render_cowart_canvas_widget` without running `npm install` or relying on `node_modules`, tldraw, npm, or network access inside the plugin cache. Development dependencies are used only by Cowart maintainers to regenerate release artifacts before publishing.
+After changing `src/` (the canvas page), run `npm ci && npm run build:artifacts` at the repo root to regenerate `mcp/generated/`. When you open a Claude session in the repo itself, the upstream `cowart_mcp` in the root `.mcp.json` is not used here; turn it off with `{"disabledMcpjsonServers": ["cowart_mcp"]}` in `.claude/settings.local.json`.
 
-If `cowart-github` is already registered, skip the first `marketplace add` command. After installation, completely quit and restart Codex once so the new skills, MCP tools, and release artifacts are fully loaded.
+## License and credits
 
-Codex automatically checks this Git marketplace when its plugin system starts and refreshes the installed Cowart plugin when the remote `main` branch changes. To check for an update immediately, run:
-
-```bash
-codex plugin marketplace upgrade cowart-github
-```
-
-An update may replace the plugin cache. After updating, completely quit and restart Codex; Cowart loads the MCP and widget artifacts shipped with the release and does not install dependencies into the new cache.
-
-## Usage
-
-### Open The Canvas
-
-Ask Codex:
-
-```text
-Open the Cowart canvas for this project.
-```
-
-Cowart opens a native Codex widget through `render_cowart_canvas_widget`; it no longer needs a localhost page or manual in-app-browser navigation. `scripts/start-canvas.sh` remains only as a local-development fallback.
-
-Canvas data is saved in the active project:
-
-```text
-canvas/pages/<page-id>/cowart-canvas.json
-canvas/pages/<page-id>/assets/
-```
-
-![Open Cowart canvas in Codex](assets/open-canvas.png)
-
-### Generate A New Image
-
-1. Open the Cowart canvas.
-2. Create and select an `AI 图片` slot on the canvas.
-3. In the generation panel, enter a prompt, optionally choose one or more reference images, then send the request.
-
-Cowart sends the prompt, reference images, and selected `AI 图片` slot dimensions to Codex. Codex generates an image for that position and aspect ratio, then replaces the `AI 图片` slot with a normal image shape.
-
-![Generate and insert a new image with Cowart](assets/generate-image.png)
-
-### Generate AI HTML
-
-1. Create and select an `AI HTML` slot from the toolbar. New slots default to `1024 × 576` (16:9).
-2. Enter a prompt in the generation panel below the slot. You can also choose or paste one or more reference images.
-3. Send the request. Codex generates a complete runnable single-file HTML page and embeds it into the selected `AI HTML` slot.
-
-The generated HTML is stored as an embedded canvas page in the current page's `assets/` directory. Select it to download a rendered image, edit text directly, continue revising the HTML with canvas annotations, or generate an image from the HTML and its annotations.
-
-![Edit Cowart AI HTML](assets/edit-html.png)
-
-### Create And Present AI Slides
-
-1. Create `AI Slides` from the toolbar. The default frame is `1048 × 600`, providing room for one `1024 × 576` (16:9) page with `12px` padding on every side.
-2. Drag images or HTML from the canvas into the Slides frame. You can also copy an image, select the Slides frame, and paste it; items are arranged horizontally in order.
-3. Selecting an empty Slides frame opens its generation panel. Describe the deck, optionally add reference images, and choose 3, 5, 10, or a custom number of pages. The default is 5 pages.
-4. After you send the request, Codex generates the requested number of visually and narratively coordinated standalone 16:9 HTML pages and appends them to the current Slides frame. The generation panel is hidden once the frame contains content.
-5. Select the Slides frame and click `演示 Slides` to preview and navigate with the thumbnail sidebar or enter fullscreen playback. In fullscreen, use the arrow keys, Space, or click static slide content to advance. Buttons, links, and form controls inside HTML remain interactive, and the playback controls stay at the top.
-
-![Present and navigate Cowart AI Slides](assets/view-slides.png)
-
-### Generate From An Annotation Screenshot
-
-1. Annotate an image on the Cowart canvas.
-2. Select the annotated image and click `按标注修改`.
-3. Cowart exports a screenshot containing the original image, arrows, and annotation text, then sends it to Codex through the widget bridge.
-
-Codex reads the notes and arrows in the screenshot, generates a clean revised image without annotation artifacts, and places it beside the original. The original image and annotations are not deleted or moved. You can also manually send a Cowart annotation screenshot to Codex and use the same revision workflow.
-
-![Generate a revised image from a Cowart annotation screenshot](assets/annotation-edit.png)
-
-## Skills
-
-- `cowart:cowart-open-canvas`: open the native Cowart canvas widget.
-- `cowart:cowart-image-gen`: receive the canvas prompt and reference images, replace the selected `AI 图片` slot with a generated image, or insert a generated image into the current page when no slot is selected.
-- `cowart:cowart-image-edit`: generate a revised image from a Cowart annotation screenshot submitted from the canvas or provided by the user.
-
-## Local Development
-
-```bash
-npm install
-npm run dev
-npm run build
-```
-
-`npm run build` regenerates and validates the self-contained MCP and widget release artifacts under `mcp/generated/`; those files must be committed with the Git release. Before committing source changes, also run `npm run quality`, which includes a cold-start probe with no `node_modules`, a fresh temporary directory, and an npm sentinel that fails if runtime installation is attempted.
-
-For local development, you can still start the Vite canvas service directly and pass the active user project directory:
-
-```bash
-./scripts/start-canvas.sh /path/to/user/project
-```
-
-Useful environment variables:
-
-- `COWART_PORT`: local service port, default `43217`.
-- `COWART_PROJECT_DIR`: the user project directory that owns the canvas data.
-- `COWART_CANVAS_DIR`: canvas data directory, default `$COWART_PROJECT_DIR/canvas`.
-
-## Developer
-
-ZHONG XIN  
-zhongxin123456@gmail.com  
-https://www.jiqiren.ai
-
-## Acknowledgments
-
-Cowart's canvas experience is built on top of [tldraw/tldraw](https://github.com/tldraw/tldraw).
+MIT. Original by ZHONG XIN ([zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)); the canvas is built on [tldraw](https://github.com/tldraw/tldraw).

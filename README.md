@@ -2,6 +2,10 @@
 
 基于 tldraw 的 AI 无限画布：图片、视频、网页截图、AI 生成的 HTML / Slides 摆在一张画布上，用箭头标出要改哪里，交给 AI 迭代。
 
+English: [README.en.md](README.en.md)
+
+![Cowart for Claude 演示：Claude 往页上放图、标注钉在卡片上、AI 改好的图放在旁边、页按文件夹归类](assets/cowart-for-claude-demo.gif)
+
 本仓库 fork 自 [zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)（MIT）。原版是 Codex 插件，画布以 MCP Apps 小部件嵌在对话里，每个项目一张；这个 fork 改成**全机一个画布服务**，让 **Claude Code 桌面版、Codex、ZCode** 的所有会话共用同一张画布、按页分工。上游代码尽量不动，改动集中在 `adapters/`。
 
 ## 相比原版
@@ -68,4 +72,4 @@ npm --prefix adapters run build:artifacts  # 改了 adapters/ 后重新生成 ad
 
 ## 许可与致谢
 
-MIT。原版作者 ZHONG XIN（[zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)），画布基于 [tldraw](https://github.com/tldraw/tldraw)。上游的英文说明原样保留在 [README.en.md](README.en.md)。
+MIT。原版作者 ZHONG XIN（[zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)），画布基于 [tldraw](https://github.com/tldraw/tldraw)。
