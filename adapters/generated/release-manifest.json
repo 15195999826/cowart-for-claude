@@ -9,7 +9,7 @@
   },
   "resources": {
     ".codex-plugin/plugin.json": "dd0715519d22c61543a81dbcc0806843c6e4ea2cde3dc3e409b59214f54c61fd",
-    "adapters/claude/codex-skill/cowart/SKILL.md": "6fc72e6c891e3d2cbcc0e896b051faf46e2c42069c92dbd7e59df849fe95ac57",
+    "adapters/claude/codex-skill/cowart/SKILL.md": "2697264786805fd649d9e3b73155570731881dabdad723c3f4cf963f9217f7fc",
     "adapters/claude/web/bridge.js": "4250813ca4f0af7a62bf38c22c50207c72da4ebfff514c3a357542d30fb7a573",
     "adapters/package.json": "656e2665a59fcff0fab65e8aca7ab0933dff684856add29afdcfea1e2d7e3463",
     "adapters/shared/empty-canvas.json": "6bddaf12509f149623013b0b7566cfd917c994be1dc35f008603833dc04b3f31",
