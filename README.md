@@ -1,170 +1,71 @@
-# Cowart
+# Cowart for Claude
 
-Cowart 是一个面向 Codex 的原生无限画布 widget 插件。它基于 tldraw 提供可视化画布，用于构思、标注、生成图片和根据标注图迭代图片。画布由 MCP widget 直接打开，数据默认保存到当前用户项目的 `canvas/` 目录，而不是保存到插件仓库里。
+基于 tldraw 的 AI 无限画布：图片、视频、网页截图、AI 生成的 HTML / Slides 摆在一张画布上，用箭头标出要改哪里，交给 AI 迭代。
 
-仓库同时遵循 [Agent Plugins v1.0.0](https://agent-plugins.org/specification)：根目录的 `plugin.json`、`skills/` 和 `mcp.json` 提供可移植插件入口；`.codex-plugin/plugin.json`、`.mcp.json` 和 `.agents/plugins/marketplace.json` 保留 Codex 专用的界面与安装元数据。
+本仓库 fork 自 [zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)（MIT）。原版是 Codex 插件，画布以 MCP Apps 小部件嵌在对话里，每个项目一张；这个 fork 改成**全机一个画布服务**，让 **Claude Code 桌面版、Codex、ZCode** 的所有会话共用同一张画布、按页分工。上游代码尽量不动，改动集中在 `adapters/`。
 
-English README: [README.en.md](README.en.md)
+## 相比原版
 
-## 体验网页版 Cowart
+| | 原版 | 本 fork |
+|---|---|---|
+| 宿主 | Codex | Claude Code 桌面版、Codex、ZCode |
+| 画布在哪看 | Codex 对话里的小部件 | 本地网页 `http://cowart.localhost`：Claude Code 的 Browser 面板、Codex 的内置浏览器，或任意浏览器 |
+| AI 怎么操作画布 | MCP 工具 | `cowart` 命令（Claude Code、Codex，不占 MCP）；ZCode 走 MCP 薄桥 |
+| 画布数据 | 每个项目一张（`<项目>/canvas`） | 全机一张（`~/.cowart/canvas`），所有项目、会话按页分工 |
+| 生图 | 经对话交给 Codex 生成 | 面板里选好模型和参数，点发送由画布服务直接生成图片 / 视频，不经对话 |
 
-**无需安装，直接开始。**
+新增：
 
-在 Codex 内置浏览器中打开 [**cowart.jiqiren.ai**](https://cowart.jiqiren.ai/)，完成登录进入画布，然后开始你的创作。
+- **按页分工**：每页同一时间归一个会话负责，画布上发出的请求自动送到负责那一页的会话；几个页面同时开着只保存差异，不互相覆盖、不误删别人的页。
+- **常驻画布服务**：全机一个，Windows 登录时自启，不随某个会话或宿主关掉而消失；新版本自动顶替旧版，已开的画布不断。
+- **AI 视频、网页参考、视频截帧**：底部工具栏多了「AI 视频」（占位框 + 生成面板）和「网页」（网页截图卡片，可「照这个做 HTML」）；右键视频可截取当前帧。
+- **AI 图片面板**：模型、画幅、参数集中在一个面板里，标明花不花钱；生成的图保持原比例，不被拉伸。
+- **标注绑定到卡片**：标注箭头钉在指着的卡片上，卡片移动跟着走、删卡片一起删；新增蓝色「注释」（常驻说明）和「清理标注」。
+- **页的文件夹**：页菜单换成文件夹树 + 搜索，可按建页先后 / 名称 / 最近改过排序；页归哪个文件夹由 AI 管。
+- **AI 整理画布**：放文字、建分组框、移动、改尺寸、删除。
+- **右键菜单**：「拷贝索引」（页名、卡片 id、本机文件路径，粘给 AI 就能用）、「在资源管理器中显示」。
+- **反馈收件箱**：在任何项目的会话里说「反馈：…」，记到本机，回本仓库统一处理。
 
-![Cowart 封面](assets/cover.png)
-
-## 功能
-
-- 在 Codex 中打开一个原生 tldraw 无限画布 widget；正常使用不再通过网页浏览器或 in-app browser 打开本地页面。
-- 在当前项目目录中持久化画布页面和图片资源。
-- 在画布中创建 AI 图片框，直接输入 prompt、选择参考图，并让 Codex 按选中框的位置和比例生成图片后替换它。
-- 创建 16:9 的 `AI HTML` 框，通过 prompt 和参考图生成可运行的单文件 HTML，并直接嵌入画布继续编辑或迭代。
-- 创建 `AI Slides`，将图片和 HTML 组织成演示文稿，或让 Codex 按指定页数生成一组 16:9 HTML 页面；支持缩略图预览和全屏播放。
-- 标注好图片后，可从画布里直接提交标注截图，让 Codex 根据标注生成干净的新图并放到原图旁边。
-- 通过 Cowart MCP 工具读取选择状态、保存画布、插入图片或 HTML，并保存到页面本地资源目录。
+顺带修掉的原版问题：Windows 上写文件失败时残留大量 `.tmp`；删图后 Ctrl+Z 只回来标注、图片回不来；最多 40 页；右键菜单开着时拖动卡片后菜单再也打不开。
 
 ## 安装
 
-> [!IMPORTANT]
-> 安装完成后，请务必完全退出并重新启动一次 Codex，再开始使用 Cowart。重启后，Cowart 的新技能和 MCP 工具才能完整加载。
-
-### 让 Codex 自动安装
-
-把下面这段发给 Codex：
-
-```text
-请通过 Cowart 仓库自带的 Git marketplace 安装 Cowart Codex 插件。
-先运行 codex plugin marketplace add zhongerxin/Cowart --ref main，
-再运行 codex plugin add cowart@cowart-github，并用 codex plugin list 确认插件已启用。
-Cowart 发布包已经包含自包含 MCP 和预构建 Widget；安装后不会在插件缓存里执行 npm install，也不要求新用户预装 tldraw；
-不要在当前仓库、插件缓存或 marketplace 快照目录手动安装依赖。
-不要把仓库 clone 到 personal marketplace。安装完成后请明确提醒我：
-必须完全退出并重新启动一次 Codex，再开始使用 Cowart。
-```
-
-### 手动安装
-
-先把 Cowart 的 Git 仓库注册为 Codex marketplace：
+要求 Node ≥ 22.12。Claude Code 只支持桌面版（命令行版、IDE 插件不行）。AI 图片 / AI 视频的直接生成走可选的 beast 生成后端（本机有 `beast` 命令行时）；没有时这类请求交给会话处理。
 
 ```bash
-codex plugin marketplace add zhongerxin/Cowart --ref main
+git clone -c core.autocrlf=false -c core.eol=lf https://github.com/15195999826/cowart-for-claude.git
+cd cowart-for-claude
+npm ci --prefix adapters
 ```
 
-再从这个 marketplace 安装并检查 Cowart：
+- **Claude Code 桌面版（+ Codex）**：`npm --prefix adapters run install:claude`。装 cowart skill 和命令入口 `~/.cowart/bin/cowart.mjs`；Windows 上加画布服务的开机自启；电脑上有 Codex（`~/.codex`）的，顺带装 Codex 的 skill 和提醒 hook。
+- **ZCode**：`npm --prefix adapters run install:zcode`。
 
-```bash
-codex plugin add cowart@cowart-github
-codex plugin list
-```
-
-不需要手动查找插件缓存目录。Cowart 的 Git 版本已经跟踪自包含 MCP bundle 和预构建的单文件 Widget；Codex 可以直接发现 `render_cowart_canvas_widget`，运行时不会执行 `npm install`，也不依赖插件缓存中的 `node_modules`、tldraw、npm 或网络。开发依赖只用于 Cowart 维护者在发布前重新生成这些产物。
-
-如果 `cowart-github` 已经注册，可以跳过第一条 `marketplace add` 命令。安装后请完全退出并重新启动一次 Codex，让新的 skill、MCP 工具和发布产物完整加载。
-
-Codex 会在启动插件系统时自动检查这个 Git marketplace，并在远程 `main` 分支发生变化后刷新已安装的 Cowart。需要立即检查更新时，可以手动运行：
-
-```bash
-codex plugin marketplace upgrade cowart-github
-```
-
-更新可能会替换插件缓存。更新后请完全退出并重新启动 Codex；Cowart 会直接加载随版本发布的 MCP 和 Widget 产物，不会在新缓存中安装依赖。
+装完新开一个会话（Codex 新开任务，第一次会请你信任提醒 hook）。卸载：`node ~/.cowart/bin/cowart.mjs uninstall`、`npm --prefix adapters run uninstall:zcode`。
 
 ## 使用
 
-### 打开画布
+在会话里说「打开 Cowart 画布」或「打开 Cowart 画布 <页名>」：
 
-在 Codex 中说：
+- **Claude Code**：画布在右侧 Browser 面板打开；画布发来的请求（按标注修改、AI HTML 等）由后台监听唤醒会话，你确认后执行。
+- **Codex**：给出链接，在内置浏览器（Ctrl+Shift+B）里看；有请求等着时，你下次发话会被提醒一句，说「看画布」处理。
+- **ZCode**：给出网址，在任意浏览器打开。
 
-```text
-Open the Cowart canvas for this project.
-```
+说「接管 <页名>」把一页换给当前会话。AI 图片、AI HTML、AI Slides、按标注修改的画布操作同原版。
 
-Cowart 会通过 `render_cowart_canvas_widget` 打开 Codex 原生 widget，不需要再启动本地网页服务或手动打开 in-app browser。`scripts/start-canvas.sh` 只保留为本地开发 fallback。
+## 开发
 
-画布数据会保存在当前项目目录下：
-
-```text
-canvas/pages/<page-id>/cowart-canvas.json
-canvas/pages/<page-id>/assets/
-```
-
-![在 Codex 中打开 Cowart 画布](assets/open-canvas.png)
-
-### 生成新图
-
-1. 打开 Cowart 画布。
-2. 在画布里创建并选中一个 `AI 图片` 框。
-3. 在弹出的生成面板里输入 prompt，也可以选择一张或多张参考图，然后点击发送。
-
-Cowart 会把 prompt、参考图和选中 `AI 图片` 框的尺寸信息发送给 Codex。Codex 会按这个框的位置和比例生成图片，然后把 `AI 图片` 框替换成普通图片形状。
-
-![使用 Cowart 生成并插入新图](assets/generate-image.png)
-
-### 根据标注图生成新图
-
-1. 在 Cowart 画布中对图片做标注。
-2. 选中被标注的图片，点击 `按标注修改`。
-3. Cowart 会导出包含原图、箭头和标注文字的截图，并通过 widget bridge 发送给 Codex。
-
-Codex 会读取截图里的标注和箭头，生成去掉标注痕迹的新图，并把结果放在原图旁边。原图和标注不会被删除或移动。你也可以手动把 Cowart 标注截图发给 Codex，走同样的修订流程。
-
-![根据 Cowart 标注截图生成修订图](assets/annotation-edit.png)
-
-### 生成 AI HTML
-
-1. 在工具栏中创建并选中一个 `AI HTML` 框；新建框默认是 `1024 × 576`（16:9）。
-2. 在框下方的生成面板中输入 prompt，也可以选择或粘贴一张或多张参考图。
-3. 点击发送后，Codex 会生成完整可运行的单文件 HTML，并把它嵌入选中的 `AI HTML` 框。
-
-生成后的 HTML 会作为画布中的嵌入页面保存在当前 page 的 `assets/` 目录。选中它后可以下载渲染图、直接编辑文本，也可以结合画布标注继续修改 HTML，或根据 HTML 和标注生成图片。
-
-![编辑 Cowart AI HTML](assets/edit-html.png)
-
-### 创建和演示 AI Slides
-
-1. 在工具栏中创建一个 `AI Slides`。默认外框是 `1048 × 600`，对应一页 `1024 × 576`（16:9）内容和四周各 `12px` 的留白。
-2. 可以把画布中的图片或 HTML 拖入 Slides，也可以复制图片后选中 Slides，再粘贴进去；内容会自动按顺序横向排列。
-3. 空 Slides 被选中时会显示生成面板。输入整套演示的描述、按需添加参考图，并选择 3、5、10 页或自定义页数；默认是 5 页。
-4. 发送后，Codex 会生成指定数量、视觉与叙事连贯的独立 16:9 HTML 页面，并依次加入当前 Slides。Slides 已有内容时不再显示生成面板。
-5. 选中 Slides 后点击 `演示 Slides`，可以通过左侧缩略图预览和切换页面，也可以进入全屏播放。全屏时支持方向键、空格键和点击静态画面翻页；HTML 自身的按钮、链接和表单交互会保留，播放控制栏固定在顶部。
-
-![演示和切换 Cowart AI Slides](assets/view-slides.png)
-
-## 技能
-
-- `cowart:cowart-open-canvas`：打开 Cowart 原生画布 widget。
-- `cowart:cowart-image-gen`：接收画布内 prompt 和参考图，用生成图片替换选中的 `AI 图片` 框；没有选中框时也可以把生成图插入当前页面。
-- `cowart:cowart-image-edit`：根据画布提交或用户提供的 Cowart 标注截图生成修订图。
-
-## 本地开发
+先读 [FORK.md](FORK.md)：开发准则（上游原样 + 适配层）、目录、宿主差异、补丁点清单。适配层结构见 [adapters/claude/README.md](adapters/claude/README.md)、[adapters/zcode/README.md](adapters/zcode/README.md)。
 
 ```bash
-npm install
-npm run dev
-npm run build
+npm --prefix adapters run check:contract   # 上游接口和补丁点还在不在
+npm --prefix adapters run test:claude      # 端到端测试（Claude Code、Codex 命令会话）
+npm --prefix adapters run test:zcode       # ZCode 桥
+npm --prefix adapters run build:artifacts  # 改了 adapters/ 后重新生成 adapters/generated/
 ```
 
-`npm run build` 会重新生成并校验 `mcp/generated/` 下需要随 Git 版本提交的自包含 MCP 和 Widget 发布产物。提交源码改动前还应运行 `npm run quality`，其中包含一个没有 `node_modules`、使用全新临时目录且禁止调用 npm 的冷启动探针。
+改了 `src/`（画布页面）要在根目录 `npm ci && npm run build:artifacts` 重新生成 `mcp/generated/`。在仓库目录里开 Claude 会话时，根目录 `.mcp.json` 里上游的 `cowart_mcp` 用不上，可在 `.claude/settings.local.json` 写 `{"disabledMcpjsonServers": ["cowart_mcp"]}` 关掉。
 
-本地开发时仍可以直接启动 Vite 画布服务，并指定用户项目目录：
+## 许可与致谢
 
-```bash
-./scripts/start-canvas.sh /path/to/user/project
-```
-
-常用环境变量：
-
-- `COWART_PORT`：本地服务端口，默认 `43217`。
-- `COWART_PROJECT_DIR`：画布数据所属的用户项目目录。
-- `COWART_CANVAS_DIR`：画布数据目录，默认是 `$COWART_PROJECT_DIR/canvas`。
-
-## 开发者
-
-ZHONG XIN  
-zhongxin123456@gmail.com  
-https://www.jiqiren.ai
-
-## 致谢
-
-Cowart 的画布能力基于 [tldraw/tldraw](https://github.com/tldraw/tldraw) 实现。
+MIT。原版作者 ZHONG XIN（[zhongerxin/Cowart](https://github.com/zhongerxin/Cowart)），画布基于 [tldraw](https://github.com/tldraw/tldraw)。上游的英文说明原样保留在 [README.en.md](README.en.md)。

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Makes a local release copy (FORK.md, 分支与同步; publish-beast-library.mjs packs one for
-// colleagues): ~/.cowart/releases/<adapters version>-<short commit>, taken from a commit's git
+// Makes a local release copy (FORK.md, 分支与同步; a release package is packed from one):
+// ~/.cowart/releases/<adapters version>-<short commit>, taken from a commit's git
 // objects rather than the working tree, so uncommitted or in-progress changes never reach it. It
 // holds the resources and artifacts of adapters/generated/release-manifest.json, the manifest and
 // release-origin.json; every file is checked against the manifest's sha256 before and after it is

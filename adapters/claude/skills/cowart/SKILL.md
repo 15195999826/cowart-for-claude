@@ -15,7 +15,7 @@ Cowart 是一块 tldraw 无限画布：图片、视频、网页截图卡片、AI
 node ~/.cowart/bin/cowart.mjs <命令> [参数]
 ```
 
-- `~/.cowart/bin/cowart.mjs` 是安装 Cowart 时写下的入口，它指向这台机器上装的那一份 Cowart。这个文件不存在（报 `Cannot find module`）就是还没装：告诉用户在 Cowart 仓库里跑 `npm --prefix adapters run install:claude`，或者照猛兽图书馆《cowart》的安装说明装，装好之前别的都别做。
+- `~/.cowart/bin/cowart.mjs` 是安装 Cowart 时写下的入口，它指向这台机器上装的那一份 Cowart。这个文件不存在（报 `Cannot find module`）就是还没装：告诉用户在 Cowart 仓库里跑 `npm --prefix adapters run install:claude`，或者照当初装 Cowart 的那份安装说明装，装好之前别的都别做。
 - 命令按要干的事分组：**会话** `open` / `take` / `listen`，**页** `pages` / `folder`，**看** `page` / `selection`，**放** `put image|video|html|text`，**整理** `group` / `edit` / `delete`，**请求** `requests` / `request` / `reply`，另有 `feedback`、`call`。`cowart help` 列出全部；`cowart help <命令>`（比如 `help put image`）列出那个命令的全部参数。
 - **放东西的位置参数 put 都一样**：`--at x,y` 放到页面上那个位置；`--next-to <id> [--side right|left|below|above]` 放在它旁边（默认右边、跟它一样大；旁边是分组框时保持自己的大小）；`--replace <AI 框 id>` 替换 AI 图片 / 视频 / HTML 框；`--size 宽,高` 显示尺寸；`--page <页名>` 放进别的页（默认你负责的页）。
 - 命令自己的参数之外，`help <命令>` 的「少用的参数」也能用（工具定义里的参数名写成短横线形式：`matchAnchor` 写成 `--match-anchor`，开关写 `--match-anchor` / `--no-match-anchor`）。负数照常写：`--at -300,-200`。

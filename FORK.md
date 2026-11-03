@@ -65,8 +65,6 @@ adapters/
     scripts/    冒烟测试、多会话测试、Codex 命令会话测试（codex-cli-test.mjs，test:codex-cli）、上游接口检查、手动联调宿主、
                 检查各用一个临时运行目录（test-runtime.mjs：令牌、服务日志、退出码不进 ~/.cowart-claude）、
                 安装（install-skill.mjs，install:claude：skill 链接进 ~/.claude/skills，再照 install.mjs 装其余的）
-    beast-library/  公司猛兽「图书馆」里《cowart》这本书的安装说明 INSTALL.md：同事二选一，省心版（取件柜的运行包，不能改）/ 开发版
-                （clone 本仓库、reset 到发版提交、去掉 origin，从此脱钩自己管），一台电脑只留一种；{{VERSION}} / {{COMMIT}} 由 publish-beast-library.mjs 填
   zcode/        ZCode 适配（说明见 adapters/zcode/README.md）：桥是 Claude 以前那个 MCP 薄桥的姊妹版（同样的工具和转发），
     bin/ lib/   差别只在怎么打开画布（网址给用户在浏览器开）和怎么收到画布请求（--once 后台任务退出唤醒）
     skills/     ZCode 版 skill cowart
@@ -75,8 +73,6 @@ adapters/
                 fix-page-order.mjs（0.2.9 之前服务给第 36 页起建的页都排在同一个 index `aa`，页菜单顺序乱；
                 它经画布服务按建页时间重排这些页，不带 --apply 只列方案）、
                 发版用的 bump-release.mjs（升适配层版本）、make-release-copy.mjs（从提交生成本地发布副本），用法见「分支与同步」；
-                publish-beast-library.mjs（给同事发版：从提交的发布副本打 cowart-<版本>.zip 投猛兽取件柜 cowart 栏，
-                再把 claude/skills/cowart 加上 version、配上 beast-library/INSTALL.md 上架猛兽图书馆，上架后删掉栏里的旧版包；--dry-run 只在临时目录里打包不上传）；
                 这几个只在开发机上跑，不进发布产物
   generated/    已打包的 cowart 命令、画布服务和发布清单；安装后不用 npm install
 FORK.md         本文件
@@ -90,7 +86,7 @@ FORK.md         本文件
 - 有补丁点以后，改了 `src/` 就要在仓库根目录 `npm ci && npm run build:artifacts` 重新生成 `mcp/generated/`，并和源码一起提交；`npm run check:artifacts` 能核对两者是否一致。
 - 改动适配层后运行 `npm --prefix adapters run build:artifacts` 和 `check:artifacts`，提交 `adapters/generated/`；`npm --prefix adapters run probe:cold` 用临时目录中的发布文件验证不依赖 `node_modules`、既有服务和真实用户画布（install 写进沙箱，另断言打包的服务入口、开机自启和 Codex 的 skill / hook）。Codex 内置浏览器里开画布、提醒 hook、Browser 面板里的页面交互仍要在宿主里手验，命令测试不能替代。
 - **发版先升适配层版本**：`node adapters/scripts/bump-release.mjs [<适配层版本>]`（不给版本就把补丁号加一，`--dry-run` 只列要改的、不写）只升 `adapters/package.json`、`adapters/package-lock.json`（版本大的服务才换得掉正在跑的旧服务，见「画布服务」的版本替换）；每处版本按出现次数核对，有一处对不上就一个文件都不写；只换版本串，换行照 git 里的原样（LF），工作区换行跟 git 不一致（CRLF 检出）时拒绝。再构建、检查适配层产物并推送。根版本跟上游一致，fork 只升适配层版本：根目录 `package.json` / `package-lock.json` / `plugin.json` 的版本和 `.codex-plugin/plugin.json` 都是上游原样（2026-10-23 恢复，根产物 `mcp/generated/` 跟着重建过，只有版本字符串变；`.codex-plugin/plugin.json` 发布产物照样带着，上游的 MCP 子进程启动时要读），同步上游时照上游的走，不另加后缀；根目录的 `npm run check:plugin` 因此能过。历史：Codex 从 GitHub marketplace 装插件时（到 2026-10-23），发版还要给插件换 `+codex.<UTC 时间>` 后缀、连根目录一起构建，装好后用 verify-release.mjs 核对插件缓存、switch-codex-entry.mjs 把 Codex 的入口换到新的本地发布副本；Codex 改走 cowart 命令后这两个脚本和插件那一半都删了。
-- **给同事发 Claude Code 版（猛兽图书馆）**：同事那边按版本号判断要不要升级（beast-home ADR-0038），所以只发 bump 过版本、已提交推送的提交：`node adapters/scripts/publish-beast-library.mjs`（先投取件柜的 `cowart-<版本>.zip`，再上架带 `version` 的书；同版本的包已在柜里且发布清单一样就跳过，发布清单不一样就停下要你先 bump；书上架成功后删掉 `cowart` 栏里别的 `cowart-*.zip`——图书馆只借最新版的书，省心版只留它对应的那个包）。只改了 `adapters/claude/beast-library/INSTALL.md` 或 skill 措辞、运行件没变：加 `--book-rev <n>`，书的版本变成 `<版本>.<n>`（图书馆要求内容改了版本号变大），运行包不重投。
+- **给同事发版不在本仓库**：分发用的东西放在仓库根目录的 `.skillbook/`，git 不跟踪（写在本机的 `.git/info/exclude` 里，公开仓库不带它），用法见它的 README。只有作者的开发机上有，别的检出里没有；别跑 `git clean -x`，会把它删掉。
 - **Windows 上构建前必须按 LF 检出**：`git config core.autocrlf false`、`git config core.eol lf`，再重新检出（`git rm -r --cached -q . && git reset -q --hard`，先把未提交的改动存好）。否则 `index.html` 和 SVG 图标会以 CRLF 被打进页面，产物跟上游对不上。
 
 ## 已核实的接缝（2026-09-11，2026-09-12 补充）
