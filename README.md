@@ -30,7 +30,7 @@
 
 ## 安装
 
-要求 Node ≥ 22.12。Claude Code 只支持桌面版（命令行版、IDE 插件不行）。AI 图片 / AI 视频的直接生成走可选的 beast 生成后端（本机有 `beast` 命令行时）；没有时这类请求交给会话处理。
+要求 Node ≥ 22.12。Claude Code 只支持桌面版（命令行版、IDE 插件不行）。AI 图片 / AI 视频面板要 beast 生成后端（本机有 `beast` 命令行）；没有它这两个面板用不了（Codex 里的 AI 图片可以选 Codex 内置生图），画布、标注、AI HTML / Slides、整理等其它功能不受影响。
 
 ```bash
 git clone -c core.autocrlf=false -c core.eol=lf https://github.com/15195999826/cowart-for-claude.git
