@@ -1,6 +1,6 @@
 {
   "name": "cowart-adapters",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Host adapters for the Cowart fork: the cowart command (Claude Code, Codex), the ZCode bridge and the canvas service they share. See ../FORK.md.",

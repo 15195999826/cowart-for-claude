@@ -193,14 +193,14 @@ function confirmNote(request) {
   return `${BACKGROUND_NOTICE}问题里概括要生成什么、几张 / 几段；选项给「执行（免费本地模型）」「执行（云端模型，消耗团队额度）」「跳过」。`
 }
 
-const IMAGEGEN_NOTE = '画布的提示词是按 Codex 写的：凡是要求用 Codex 内置 imagegen / 当前可用的图片生成能力的地方，改用 beast-gen skill（先用 Skill 工具加载它，按它的规则出图）。免费本地档：文生图用 krea2，按标注 / 参考图改图用 flux2-klein；云端档用 lib-image（Lib Image 2.5，quality=low 起步）。模板与参数以 beast gen templates 现查为准。结果下载到本地后，按请求里的要求调用 insert_cowart_image，imagePath 传本地文件路径。'
+const IMAGEGEN_NOTE = '画布的提示词是按 Codex 写的：凡是要求用 Codex 内置 imagegen / 当前可用的图片生成能力的地方，改用 beast-gen skill（先用 Skill 工具加载它，按它的规则出图）。免费本地档：文生图用 krea2，按标注 / 参考图改图用 flux2-klein；云端档用 libtv-image（Lib Image 2.5，quality=low 起步）。模板与参数以 beast gen templates 现查为准。结果下载到本地后，按请求里的要求调用 insert_cowart_image，imagePath 传本地文件路径。'
 
 function generationNote(request) {
   if (request.kind === 'video') {
     return '这是视频请求：先用 Skill 工具加载 beast-gen，按请求里写好的模板和参数提交，素材按请求的顺序上传后填进对应参数；生成后下载到本地，按请求调用 insert_cowart_video（replaceHolderShapeId 传 AI 视频框的 id）。'
   }
   if (request.kind === 'image') {
-    return '这是图片请求：先用 Skill 工具加载 beast-gen，按请求里的模板和参数出图，按 skill 的要求先读对应参考（lib-image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地，Read 看图，再按请求调用 insert_cowart_image。'
+    return '这是图片请求：先用 Skill 工具加载 beast-gen，按请求里的模板和参数出图，按 skill 的要求先读对应参考（libtv-image 的 Lib Image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地，Read 看图，再按请求调用 insert_cowart_image。'
   }
   if (request.kind === 'web') {
     return '这是网页复刻请求：先 Read 请求里的整页截图（很长时分段看），有标注的话逐张 Read 标注的局部截图，再读渲染后的页面代码；要看真实的颜色、字体、间距，或按坐标找标注指的元素，可以用 Skill 工具加载 control-browser（browser-use）打开原网址对照，读计算后的样式、用 document.elementFromPoint 定位。做成单文件 HTML 后按请求调用 insert_cowart_html_draft。'

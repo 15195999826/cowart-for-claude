@@ -73,7 +73,7 @@ function imagePlan(resolved, host) {
   const template = auto ? 'auto' : settings.model.template
   const { w, h } = shapeSize(holder)
   const tag = (index) => {
-    if (template === 'lib-image') return `图${index + 1}`
+    if (template === 'libtv-image') return `图${index + 1}`
     if (SINGLE_REFERENCE_TEMPLATES.has(template)) return 'the reference image'
     return `image ${index + 1}`
   }

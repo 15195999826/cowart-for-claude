@@ -9,7 +9,7 @@ import { basename, dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const FIXTURES = dirname(fileURLToPath(import.meta.url))
-const VIDEO_TEMPLATES = new Set(['minimax-h3', 'seedance'])
+const VIDEO_TEMPLATES = new Set(['minimax-h3', 'libtv-video'])
 const argv = process.argv.slice(2).filter((arg) => arg !== '--json')
 const [domain, verb, ...rest] = argv
 

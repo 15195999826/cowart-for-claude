@@ -18,7 +18,7 @@ const LIB_QUALITIES = [
 function libImage(id, templateModel, label, description) {
   return {
     id,
-    template: 'lib-image',
+    template: 'libtv-image',
     templateModel,
     label,
     tag: '云',

@@ -44,7 +44,7 @@ const TEMPLATES = {
     guides: ['ideogram4-caption.md'],
     rule: 'Write the complete structured caption the guide describes (key order, bbox, palette). Give the caption object itself as "prompt" (a JSON object, not a string).'
   },
-  'lib-image': {
+  'libtv-image': {
     guides: ['image-prompting.md'],
     rule: 'Write the prompt the guide describes, in the language that fits the user (Chinese is fine). Say what each reference image is for, as 图1, 图2 … in upload order.'
   },
@@ -52,7 +52,7 @@ const TEMPLATES = {
     guides: ['h3-prompt.md'],
     rule: 'Write the English prompt structure the guide prescribes for the mode in the brief (the three fields, or the six sections for Ref2VA). When the brief gives a firstLine, the prompt starts with exactly that line, then an empty line, then the fields. Use the material tags from the brief.'
   },
-  seedance: {
+  'libtv-video': {
     guides: ['seedance-prompt.md'],
     rule: 'Write the Chinese prompt the guide prescribes. Refer to materials with the tags from the brief (图片N / 视频N / 音频N; a first or last frame as 首帧 / 尾帧). Do not put ratio, duration, resolution or sound into the prompt.'
   }

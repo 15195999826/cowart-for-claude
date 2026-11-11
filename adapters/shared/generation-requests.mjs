@@ -138,10 +138,10 @@ function ratioText(width, height) {
 
 function autoModelGuide(host) {
   return [
-    '- 模型由你按需求挑（beast-gen skill 的选型表）：没参考图的海选、概念稿 → krea2；指令改图、多图合成（参考图 ≤4）→ flux2-klein；最强保身份、参考图多、复杂构图 → flux2-dev；海报 / UI / 带字物料 → ideogram4；云端 lib-image（Lib Image 2.5，消耗团队额度）只在描述里点名或确有必要时用。',
+    '- 模型由你按需求挑（beast-gen skill 的选型表）：没参考图的海选、概念稿 → krea2；指令改图、多图合成（参考图 ≤4）→ flux2-klein；最强保身份、参考图多、复杂构图 → flux2-dev；海报 / UI / 带字物料 → ideogram4；云端 libtv-image（Lib Image 2.5，消耗团队额度）只在描述里点名或确有必要时用。',
     host === 'codex' ? '- 也可以用 Codex 内置 imagegen；拿不准时优先本地免费的 beast 模板。' : null,
     '- 画幅取上面 Target canvas slot 最接近、且所选模板支持的比例；分辨率、张数按上面的参数。',
-    '- 按所选模板的提示词写法写提示词（flux2 系写英文指令「做什么 + 保留什么」，ideogram4 写 JSON 标注，lib-image 按 references/image-prompting.md）。'
+    '- 按所选模板的提示词写法写提示词（flux2 系写英文指令「做什么 + 保留什么」，ideogram4 写 JSON 标注，libtv-image 按 references/image-prompting.md）。'
   ].filter(Boolean)
 }
 

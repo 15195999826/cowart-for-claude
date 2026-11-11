@@ -58,7 +58,7 @@ Cowart 是一块 tldraw 无限画布：图片、视频、网页截图卡片、AI
 **Codex 口吻怎么翻译**：请求是上游按 Codex 写的，遇到这些照下面理解：
 
 - 开头的 `[@Cowart](plugin://…)` 是 Codex 的插件提及，忽略。
-- 「用内置 imagegen」「用 Codex 当前可用的图片生成能力」= 用 beast-gen skill：先用 Skill 工具加载它，按它的选型表和写法出图，`beast gen output` 落本地，Read 看一眼没问题再插。免费档随便迭代：文生图 `krea2`，指令改图 / 多图合成 `flux2-klein`，最强保身份 / 参考图多 `flux2-dev`，带字物料 `ideogram4`；云端 `lib-image` 消耗团队额度，只在用户选了云端时用。
+- 「用内置 imagegen」「用 Codex 当前可用的图片生成能力」= 用 beast-gen skill：先用 Skill 工具加载它，按它的选型表和写法出图，`beast gen output` 落本地，Read 看一眼没问题再插。免费档随便迭代：文生图 `krea2`，指令改图 / 多图合成 `flux2-klein`，最强保身份 / 参考图多 `flux2-dev`，带字物料 `ideogram4`；云端 `libtv-image` 消耗团队额度，只在用户选了云端时用。
 - 「不要调用 render_cowart_canvas_widget」照做。
 - 「把图片下载到当前项目的 canvas/pages/<page-id>/assets/」：画布不在项目里。插入工具会自己把文件拷进页素材目录，你只管给本地路径。只有 AI HTML 里要嵌本地图片时，才把图放进画布摘要给的 canvasDir 下 `pages/<页 id 去掉 page: 前缀>/assets/`，HTML 里用 `/page-assets/<同一个目录名>/<文件名>` 引用；不要用 file:// 或 http(s) 图片，页面安全策略会拦。
 - 请求里给的截图、参考图路径都是本地文件，直接 Read。
@@ -169,5 +169,5 @@ Cowart 是一块 tldraw 无限画布：图片、视频、网页截图卡片、AI
 - 不为面板里点发送的 AI 图片 / AI 视频插手：那是画布服务在做。
 - 不重复 render；画布自己同步。
 - 处理完画布请求后忘记重启监听（后台再跑一次监听命令）。
-- 云端模型（lib-image、seedance、meshy）先说明消耗团队额度再用；免费本地模型随便迭代。
+- 云端模型（libtv-image、libtv-video、meshy）先说明消耗团队额度再用；免费本地模型随便迭代。
 - 画布请求先问后做；撤销了就不做。

@@ -750,12 +750,12 @@ function confirmNote(request) {
 }
 
 function generationNote(request, cli) {
-  const imagegen = `画布的提示词是按 Codex 写的：凡是要求用 Codex 内置 imagegen / 当前可用的图片生成能力的地方，改用 beast-gen skill（先用 Skill 工具加载它，按它的规则出图）。免费本地档：文生图用 krea2，按标注 / 参考图改图用 flux2-klein；云端档用 lib-image（Lib Image 2.5，quality=low 起步）。模板与参数以 beast gen templates 现查为准。结果下载到本地后，按请求里的要求放上画布（${cli} put image <本地路径> …，或照搬请求写的 insert_cowart_image 调用）。`
+  const imagegen = `画布的提示词是按 Codex 写的：凡是要求用 Codex 内置 imagegen / 当前可用的图片生成能力的地方，改用 beast-gen skill（先用 Skill 工具加载它，按它的规则出图）。免费本地档：文生图用 krea2，按标注 / 参考图改图用 flux2-klein；云端档用 libtv-image（Lib Image 2.5，quality=low 起步）。模板与参数以 beast gen templates 现查为准。结果下载到本地后，按请求里的要求放上画布（${cli} put image <本地路径> …，或照搬请求写的 insert_cowart_image 调用）。`
   if (request.kind === 'video') {
     return `这是视频请求：先用 Skill 工具加载 beast-gen，按请求里写好的模板和参数提交，素材按请求的顺序上传后填进对应参数；生成后下载到本地，按请求放进画布：${cli} put video <本地路径> --replace <AI 视频框的 id>。`
   }
   if (request.kind === 'image') {
-    return `这是图片请求：先用 Skill 工具加载 beast-gen，按请求里的模板和参数出图，按 skill 的要求先读对应参考（lib-image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地，Read 看图，再按请求放进画布：${cli} put image <本地路径> --replace <AI 图片框的 id>。`
+    return `这是图片请求：先用 Skill 工具加载 beast-gen，按请求里的模板和参数出图，按 skill 的要求先读对应参考（libtv-image 的 Lib Image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地，Read 看图，再按请求放进画布：${cli} put image <本地路径> --replace <AI 图片框的 id>。`
   }
   if (request.kind === 'web') {
     return `这是网页复刻请求：先 Read 请求里的整页截图（很长时分段看），有标注的话逐张 Read 标注的局部截图，再读渲染后的页面代码；要看真实的颜色、字体、间距，或按坐标找标注指的元素，可以用 Browser 面板打开原网址（mcp__Claude_Browser__navigate，再用 read_page / javascript_tool 读计算后的样式、用 document.elementFromPoint 定位）。做成单文件 HTML 后按请求放进画布：${cli} put html <HTML 文件> --replace <AI HTML 框 id>。`
@@ -791,7 +791,7 @@ function codexGenerationNote(request, cli) {
   if (request.kind === 'image') {
     return /^Model: Codex imagegen/m.test(request.text)
       ? `这是图片请求，用户选的是 Codex imagegen：用 Codex 内置的图片生成出图（参考图按请求的顺序当视觉参考）；存到本地、看一眼没问题，再按请求放进画布：${cli} put image <本地路径> --replace <AI 图片框的 id>。`
-      : `这是图片请求：照 beast-gen skill，按请求里的模板和参数出图，按 skill 的要求先读对应参考（lib-image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地、看一眼没问题，再按请求放进画布：${cli} put image <本地路径> --replace <AI 图片框的 id>。`
+      : `这是图片请求：照 beast-gen skill，按请求里的模板和参数出图，按 skill 的要求先读对应参考（libtv-image 的 Lib Image 2.5 系读 references/image-prompting.md，ideogram4 读 references/ideogram4-caption.md，透明底读 references/transparent-asset.md）；生成后下载到本地、看一眼没问题，再按请求放进画布：${cli} put image <本地路径> --replace <AI 图片框的 id>。`
   }
   if (request.kind === 'web') {
     return `这是网页复刻请求：先看请求里的整页截图（很长时分段看），有标注的话逐张看标注的局部截图，再读渲染后的页面代码；要看真实的颜色、字体、间距，或按坐标找标注指的元素，可以在 Codex 的内置浏览器里打开原网址看。做成单文件 HTML 后按请求放进画布：${cli} put html <HTML 文件> --replace <AI HTML 框 id>。`

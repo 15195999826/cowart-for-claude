@@ -82,7 +82,7 @@ node ~/.cowart/bin/cowart.mjs <命令> [参数]
 **请求里的旧说法**：请求是上游按 Codex 插件写的，遇到这些照下面理解：
 
 - 开头的 `[@Cowart](plugin://…)` 是以前插件的提及，忽略。
-- 「用内置 imagegen」「用当前可用的图片生成能力」= 用 Codex 内置的图片生成；指定了猛兽（beast）模板的照 beast-gen skill 提交。云端模型（lib-image、seedance、meshy）消耗团队额度，用户不知道要花钱的先说一句；免费本地模板随便迭代。
+- 「用内置 imagegen」「用当前可用的图片生成能力」= 用 Codex 内置的图片生成；指定了猛兽（beast）模板的照 beast-gen skill 提交。云端模型（libtv-image、libtv-video、meshy）消耗团队额度，用户不知道要花钱的先说一句；免费本地模板随便迭代。
 - 「调用 insert_cowart_… 工具」= `cowart call` 照搬，或换成对应的 put 命令。「不要调用 render_cowart_canvas_widget」= 不要重新 `cowart open`。
 - 「把图片下载到当前项目的 canvas/pages/<page-id>/assets/」：画布不在项目里。插入命令会自己把文件拷进页素材目录，你只管给本地路径。只有 AI HTML 里要嵌本地图片时，才把图放进画布摘要给的 canvasDir 下 `pages/<页 id 去掉 page: 前缀>/assets/`，HTML 里用 `/page-assets/<同一个目录名>/<文件名>` 引用；不要用 file:// 或 http(s) 图片，页面安全策略会拦。
 - 请求里给的截图、参考图路径都是本地文件，直接打开看。
@@ -201,6 +201,6 @@ node ~/.cowart/bin/cowart.mjs <命令> [参数]
 - 不手改 `~/.cowart/canvas` 下的文件，不把文字画成图片再插：文字、分组、排版、删除都有命令（4.1）。
 - 不为面板里点发送的 AI 图片 / AI 视频插手：那是画布服务在做。
 - 不重复 open；画布自己同步。
-- 云端模型（lib-image、seedance、meshy）先说明消耗团队额度再用；免费本地模型随便迭代。
+- 云端模型（libtv-image、libtv-video、meshy）先说明消耗团队额度再用；免费本地模型随便迭代。
 - 画布请求等用户说「看画布」或答应了再做；撤销了就不做；提醒出现时先答用户的话。
 - 不跑 `listen`（那是 Claude Code 的），也不找以前插件的 `cowart_mcp` 工具（`render_cowart_canvas_widget` 这些）：Codex 里只有 cowart 命令。

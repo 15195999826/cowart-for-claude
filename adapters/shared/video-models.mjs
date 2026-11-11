@@ -12,7 +12,7 @@ const SEEDANCE_LIMITS = { images: 30, videos: 10, audios: 10 }
 function seedance(id, model, label, description, { resolutions, maxDuration }) {
   return {
     id,
-    template: 'seedance',
+    template: 'libtv-video',
     templateModel: model,
     label,
     description,
